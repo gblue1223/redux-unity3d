@@ -91,6 +91,9 @@ public static class Reducers {
 }
 ```
 
+## Version
+0.1.0
+
 License
 ----
 MIT
