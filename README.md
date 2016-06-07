@@ -2,7 +2,7 @@
 Redux for Unity3D (.NET 3.5)
 
 This is C# version of Redux(http://redux.js.org/) for Unity3D. Almost every interfaces are same as the original Redux. 
-I'm not expert in C#. So, it is welcome if you have an idea to elevate this library.
+However, I'm not expert in C#. So, it is welcome if you have an idea to elevate this library.
 
 ## create store
 ```c#
@@ -48,3 +48,49 @@ Redux.removeReducers (new Redux.Reducer[]{
 	Reducers.multiplyResult
 });
 ```
+
+### action, reducer
+```c#
+public static class Actions {
+	public class Sum {
+		public int ret;
+		public Sum (int x, int y) {
+			this.ret = x + y;
+		}
+	}
+	public class Multiply {
+		public int ret;
+		public Multiply (int x, int y) {
+			this.ret = x * y;
+		}
+	}
+}
+
+public static class Reducers {
+	public static Redux.Reducer sumResult = (object state, object action) => {
+		if (action.GetType ().FullName == "Redux+INITIAL_ACTION") {
+			return 1;
+		}
+		if (action.GetType ().Name == "Sum") {
+			var a = (Actions.Sum)action;
+			return a.ret;
+		}
+		return state;
+	};
+	
+	public static Redux.Reducer multiplyResult = (object state, object action) => {
+		if (action.GetType ().FullName == "Redux+INITIAL_ACTION") {
+			return 2;
+		}
+		if (action.GetType ().Name == "Multiply") {
+			var a = (Actions.Multiply)action;
+			return a.ret;
+		}
+		return state;
+	};
+}
+```
+
+## License
+----
+MIT
