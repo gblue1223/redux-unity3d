@@ -3,7 +3,12 @@ using System.Linq;
 
 public static partial class Redux {
 
-	public class INITIAL_ACTION {};
+	internal static class ActionType {
+		public const string INIT = "@@redux/C#/INIT";
+	};
+	internal static ActionCreator initialAction = () => {
+		return new Action{ type = ActionType.INIT };
+	};
 
 	public static CreateStore createStore = (finalReducer, initialStateTree, enhancer) => {
 		if (enhancer != null) {
@@ -17,7 +22,7 @@ public static partial class Redux {
 		var isDispatching = false;
 		Store store = new Store();
 
-		Action ensureCanMutateNextListeners = () => {
+		System.Action ensureCanMutateNextListeners = () => {
 			if (nextListeners.Equals (currentListeners)) {
 				nextListeners = new Listeners (currentListeners);
 			}
@@ -83,10 +88,10 @@ public static partial class Redux {
 
 		store.replaceReducer = (nextReducer) => {
 			currentReducer = nextReducer;
-			store.dispatch(new Redux.INITIAL_ACTION ());
+			store.dispatch(initialAction ());
 		};
 
-		store.dispatch (new Redux.INITIAL_ACTION ());
+		store.dispatch (initialAction ());
 		return store;
 	};
 }

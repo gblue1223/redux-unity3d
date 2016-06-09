@@ -2,40 +2,43 @@
 using System.Collections;
 
 public class SimpleReduxTest : MonoBehaviour {
-	public static class Actions {
-		public class Sum {
-			public int ret;
-			public Sum (int x, int y) {
-				this.ret = x + y;
-			}
-		}
-		public class Multiply {
-			public int ret;
-			public Multiply (int x, int y) {
-				this.ret = x * y;
-			}
-		}
+	public static class ActionCreators {
+		public static Redux.ActionCreator<int, int> sum = (x, y) => {
+			return new Redux.Action {
+				type = "sum",
+				data = x + y
+			};
+		};
+
+		public static Redux.ActionCreator<int, int> multiply = (x, y) => {
+			return (ReduxMiddleware.Thunk)((dispatch) => {
+				return dispatch(new Redux.Action {
+					type = "multiply",
+					data = x * y
+				});
+			});
+		};
 	}
 
 	public static class Reducers {
-		public static Redux.Reducer sumResult = (object state, object action) => {
-			if (action.GetType ().FullName == "Redux+INITIAL_ACTION") {
+		public static Redux.Reducer sumResult = (state, action) => {
+			var a = action as Redux.Action;
+			if (a.IsInitialAction) {
 				return 1;
 			}
-			if (action.GetType ().Name == "Sum") {
-				var a = (Actions.Sum)action;
-				return a.ret;
+			if (a.type == "sum") {
+				return (int)a.data;
 			}
 			return state;
 		};
 
-		public static Redux.Reducer multiplyResult = (object state, object action) => {
-			if (action.GetType ().FullName == "Redux+INITIAL_ACTION") {
+		public static Redux.Reducer multiplyResult = (state, action) => {
+			var a = action as Redux.Action;
+			if (a.IsInitialAction) {
 				return 2;
 			}
-			if (action.GetType ().Name == "Multiply") {
-				var a = (Actions.Multiply)action;
-				return a.ret;
+			if (a.type == "multiply") {
+				return (int)a.data;
 			}
 			return state;
 		};
@@ -54,6 +57,7 @@ public class SimpleReduxTest : MonoBehaviour {
 			}),
 			null,
 			Redux.applyMiddleware(new Redux.Middleware[]{
+				ReduxMiddleware.createThunk,
 				ReduxMiddleware.createLogger,
 				ReduxMiddleware.createCrashReport
 			})
@@ -65,8 +69,8 @@ public class SimpleReduxTest : MonoBehaviour {
 		{
 			Debug.Log ("----------- Dispatch");
 
-			this.store.dispatch(new Actions.Sum (10, 20));
-			this.store.dispatch(new Actions.Multiply (10, 20));
+			this.store.dispatch(ActionCreators.sum (10, 20));
+			this.store.dispatch(ActionCreators.multiply (10, 20));
 
 			Debug.Log ("----------- Remove reducers");
 
@@ -77,8 +81,8 @@ public class SimpleReduxTest : MonoBehaviour {
 			Debug.Log ("----------- Dispatch");
 
 			try {
-				this.store.dispatch(new Actions.Sum (100, 200));
-				this.store.dispatch(new Actions.Multiply (100, 200));
+				this.store.dispatch(ActionCreators.sum (100, 200));
+				this.store.dispatch(ActionCreators.multiply (100, 200));
 			} catch (Redux.Error e) {
 				Debug.LogError (e.Message);
 			}

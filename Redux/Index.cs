@@ -7,18 +7,23 @@ public static partial class Redux {
 		public Error(string msg) : base(msg) {}
 	};
 
-	#region CreateStore
-
-	public delegate Store CreateStore(FinalReducer finalReducer,
-		StateTree initialStateTree = null, Enhancer enhancer = null);
-
-	#endregion
-
-	#region CombineReducers
-
 	public class StateTree : Dictionary<int, object>{
 		public StateTree() : base() {}
 		public StateTree(StateTree stateTree) : base(stateTree) {}
+	};
+
+	public delegate object ActionCreator ();
+	public delegate object ActionCreator<A1> (A1 a1);
+	public delegate object ActionCreator<A1, A2> (A1 a1, A2 a2);
+	public delegate object ActionCreator<A1, A2, A3> (A1 a1, A2 a2, A3 a3);
+	public delegate object ActionCreator<A1, A2, A3, A4> (A1 a1, A2 a2, A3 a3, A4 a4);
+	public delegate object ActionCreator<A1, A2, A3, A4, A5> (A1 a1, A2 a2, A3 a3, A4 a4, A5 a5);
+	public class Action {
+		public string type;
+		public object data;
+		public bool IsInitialAction {
+			get { return this.type == ActionType.INIT; }
+		}
 	};
 
 	public delegate object Reducer (object prevState, object action);
@@ -32,6 +37,15 @@ public static partial class Redux {
 		public Listeners() : base() {}
 		public Listeners(Listeners listeners) : base(listeners) {}
 	};
+
+	#region CreateStore
+
+	public delegate Store CreateStore(FinalReducer finalReducer,
+		StateTree initialStateTree = null, Enhancer enhancer = null);
+
+	#endregion
+
+	#region CombineReducers
 
 	public delegate StateTree FinalReducer(StateTree stateTree, object action);
 	public delegate FinalReducer CombineReducers (Reducer[] reducers);
