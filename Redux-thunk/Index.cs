@@ -1,12 +1,13 @@
 ﻿public static partial class ReduxMiddleware
 {
-	public delegate Redux.Dispatch Thunk(Redux.Dispatch dispatch);
+	public delegate object Thunk(Redux.Dispatch dispatch);
 
 	public static Redux.Middleware createThunk = api => next => action => {
-		if (action.GetType().FullName == "ReduxMiddleware+Thunk") {
-			return ((Thunk)action)(api.dispatch);
+		try {
+			return (action as Thunk)(api.dispatch);
 		}
-
-		return next(action);
+		catch (System.Exception) {
+			return next(action);
+		}
 	};
 }
