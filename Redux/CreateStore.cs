@@ -34,7 +34,7 @@ public static partial class Redux {
 
 		store.getState = (reducer) => {
 			if (!currentStateTree.ContainsKey (reducer.GetHashCode ())) {
-				throw new Error ("Reducer '" + reducer.GetHashCode () + "' removed.");
+				throw new Error ("Reducer '" + reducer.GetHashCode () + "' not found.");
 			}
 			return currentStateTree [reducer.GetHashCode ()];
 		};

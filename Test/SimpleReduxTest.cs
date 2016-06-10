@@ -23,7 +23,7 @@ public class SimpleReduxTest : MonoBehaviour {
 	public static class Reducers {
 		public static Redux.Reducer sumResult = (state, action) => {
 			var a = action as Redux.Action;
-			if (a.IsInitialAction) {
+			if (a.isInitialAction) {
 				return 1;
 			}
 			if (a.type == "sum") {
@@ -34,7 +34,7 @@ public class SimpleReduxTest : MonoBehaviour {
 
 		public static Redux.Reducer multiplyResult = (state, action) => {
 			var a = action as Redux.Action;
-			if (a.IsInitialAction) {
+			if (a.isInitialAction) {
 				return 2;
 			}
 			if (a.type == "multiply") {

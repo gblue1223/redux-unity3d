@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 public static partial class Redux {
-
+	
 	public class Error : Exception {
 		public Error(string msg) : base(msg) {}
 	};
@@ -21,8 +21,14 @@ public static partial class Redux {
 	public class Action {
 		public string type;
 		public object data;
-		public bool IsInitialAction {
+		public bool isInitialAction {
 			get { return this.type == ActionType.INIT; }
+		}
+		public T to<T>() {
+			return (T)this.data;
+		}
+		public T to<T>(T type) {
+			return (T)this.data;
 		}
 	};
 
