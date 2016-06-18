@@ -11,7 +11,7 @@ public class SimpleReduxTest : MonoBehaviour {
 		};
 
 		public static Redux.ActionCreator<int, int> multiply = (x, y) => {
-			return (ReduxMiddleware.Thunk)((dispatch) => {
+			return (ReduxMiddleware.Thunk)(dispatch => {
 				return dispatch(new Redux.Action {
 					type = "multiply",
 					data = x * y

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Text;
+using System.Collections;
 using System.Collections.Generic;
 
 public static partial class Redux {
@@ -7,9 +9,39 @@ public static partial class Redux {
 		public Error(string msg) : base(msg) {}
 	};
 
-	public class StateTree : Dictionary<int, object>{
-		public StateTree() : base() {}
-		public StateTree(StateTree stateTree) : base(stateTree) {}
+	public class StateTree : Dictionary<Reducer, object>, System.ICloneable {
+		public object Clone () {
+			var st = new StateTree ();
+			foreach (var pair in this) {
+				var v = pair.Value as System.ICloneable;
+				if (v != null) {
+					st.Add (pair.Key, v.Clone ());
+				} else {
+					st.Add (pair.Key, pair.Value);
+				}
+			}
+			return st;
+		}
+
+		public override string ToString () {
+			var sb = new StringBuilder ();
+			sb.Append ("{ ");
+			foreach (var pair in this) {
+				sb.Append ("\"");
+				sb.Append (pair.Key.Method.ReflectedType.FullName);
+				sb.Append (".");
+				sb.Append (pair.Key.Method.Name);
+				sb.Append ("\"");
+				sb.Append (": ");
+
+				sb.Append ("\"");
+				sb.Append (pair.Value.ToString ());
+				sb.Append ("\"");
+				sb.Append (", \r\n");
+			}
+			sb.Append (" }");
+			return sb.ToString();
+		}
 	};
 
 	public delegate object ActionCreator ();
@@ -30,18 +62,34 @@ public static partial class Redux {
 		public T to<T>(T type) {
 			return (T)this.data;
 		}
+		public override string ToString() {
+			if (this.data != null) {
+				return this.type + " { " + this.data + " }";
+			}
+			return this.type + " { }";
+		}
 	};
 
 	public delegate object Reducer (object prevState, object action);
-	public class Reducers : Dictionary<int, Reducer>{
-		public Reducers() : base() {}
-		public Reducers(Reducers reducers) : base(reducers) {}
+	public class Reducers : Dictionary<int, Reducer>, System.ICloneable {
+		public object Clone () {
+			var dic = new Reducers ();
+			foreach (var pair in this) {
+				dic.Add (pair.Key, pair.Value);
+			}
+			return dic;
+		}
 	};
 
 	public delegate void Listener (Store store);
-	public class Listeners : LinkedList<Listener>{
-		public Listeners() : base() {}
-		public Listeners(Listeners listeners) : base(listeners) {}
+	public class Listeners : LinkedList<Listener>, System.ICloneable {
+		public object Clone () {
+			var ll = new Listeners ();
+			foreach (var v in this) {
+				ll.AddLast (v);
+			}
+			return ll;
+		}
 	};
 
 	#region CreateStore

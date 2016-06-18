@@ -33,7 +33,7 @@ public partial class TodoExample : MonoBehaviour {
 	string todoTitle = "";
 	Item[] todos;
 
-	Redux.Devtools.MonitoredState monitoredState;
+	Redux.Devtools.Timeline timeline;
 
 	Item getVisibleTodo (Item todo) {
 		switch (this.visibilityFilter) {
@@ -104,33 +104,36 @@ public partial class TodoExample : MonoBehaviour {
 		}
 
 		x = 20;
-		w = 150;
+		w = 200;
 		h = 20;
 		GUI.Label (new Rect (x, y, w, h), "Timeline (Action: " +
-			(this.monitoredState.computedStateTreeIndex + 1) + "/" +
-			this.monitoredState.computedStateTrees.Count + ")");
+			(this.timeline.monitoredStateIndex + 1) + "/" +
+			this.timeline.monitoredStates.Count + ")");
 
 		y += h + ygap;
-		x = 250;
+		x = 300;
 		w = 20;
 		if (GUI.Button(new Rect(x, y, w, h), "<")) {
-			var i = this.monitoredState.computedStateTreeIndex - 1;
+			var i = this.timeline.monitoredStateIndex - 1;
 			this.store.dispatch (Redux.Devtools.ActionCreators.jumpToState(i));
 		}
 		x += w + xgap;
 		if (GUI.Button(new Rect(x, y, w, h), ">")) {
-			var i = this.monitoredState.computedStateTreeIndex + 1;
-			this.store.dispatch (Redux.Devtools.ActionCreators.jumpToState(i));
+			var i = this.timeline.monitoredStateIndex + 1;
+			if (i < this.timeline.monitoredStates.Count) {
+				Global.store.dispatch (Redux.Devtools.ActionCreators.jumpToState(i));
+			}
 		}
 
 		y += h + ygap;
 		x = 20;
 		w = 300;
 		var ret = GUI.HorizontalSlider (new Rect(x, y, w, h),
-			this.monitoredState.computedStateTreeIndex,
-			0, this.monitoredState.computedStateTrees.Count - 1);
-		
-		if (ret != this.monitoredState.computedStateTreeIndex) {
+			this.timeline.monitoredStateIndex,
+			0, this.timeline.monitoredStates.Count - 1);
+
+		if (ret != this.timeline.monitoredStateIndex &&
+			ret < this.timeline.monitoredStates.Count) {
 			this.store.dispatch (Redux.Devtools.ActionCreators.jumpToState(
 				Mathf.RoundToInt(ret)
 			));
@@ -142,7 +145,7 @@ public partial class TodoExample : MonoBehaviour {
 		this.visibilityFilter = (string)store.getState (Reducers.visibilityFilter);
 	}
 
-	void OnChangeMonitoredState (Redux.Devtools.MonitoredState monitoredState) {
-		this.monitoredState = monitoredState;
+	void OnChangeMonitoredState (Redux.Devtools.Timeline timeline) {
+		this.timeline = timeline;
 	}
 }

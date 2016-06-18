@@ -3,10 +3,11 @@
 	public delegate object Thunk(Redux.Dispatch dispatch);
 
 	public static Redux.Middleware createThunk = api => next => action => {
-		try {
-			return (action as Thunk)(api.dispatch);
+		var thunk = action as Thunk;
+		if (thunk != null) {
+			return thunk(api.dispatch);
 		}
-		catch (System.Exception) {
+		else {
 			return next(action);
 		}
 	};
