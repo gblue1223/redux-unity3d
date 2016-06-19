@@ -24,7 +24,7 @@ public static partial class Redux {
 
 		System.Action ensureCanMutateNextListeners = () => {
 			if (nextListeners.Equals (currentListeners)) {
-				nextListeners = new Listeners (currentListeners);
+				nextListeners = (Listeners)currentListeners.Clone ();
 			}
 		};
 
@@ -33,10 +33,13 @@ public static partial class Redux {
 		};
 
 		store.getState = (reducer) => {
-			if (!currentStateTree.ContainsKey (reducer.GetHashCode ())) {
-				throw new Error ("Reducer '" + reducer.GetHashCode () + "' not found.");
+			if (!currentStateTree.ContainsKey (reducer)) {
+				var name = reducer.Method.ReflectedType.FullName;
+				name += ".";
+				name += reducer.Method.Name;
+				throw new Error ("Reducer '" + name + "' not found.");
 			}
-			return currentStateTree [reducer.GetHashCode ()];
+			return currentStateTree [reducer];
 		};
 
 		store.subscribe = (listener) => {

@@ -24,15 +24,15 @@
 			var nextStateTree = new StateTree ();
 			foreach (var reducerPair in finalReducers) {
 				var reducer = reducerPair.Value;
-				var previousStateForKey = stateTree.ContainsKey(reducerPair.Key) ? 
-					stateTree [reducerPair.Key] : null;
+				var previousStateForKey = stateTree.ContainsKey(reducer) ? 
+					stateTree [reducer] : null;
 				
 				var nextStateForKey = reducer (previousStateForKey, action);
 				if (nextStateForKey == null) {
 					var msg = getUndefinedStateErrorMessage (reducer, action);
 					throw new Error (msg);
 				}
-				nextStateTree.Add (reducerPair.Key, nextStateForKey);
+				nextStateTree.Add (reducer, nextStateForKey);
 				hasChanged = hasChanged || !nextStateForKey.Equals (previousStateForKey);
 			}
 			return hasChanged ? nextStateTree : stateTree;

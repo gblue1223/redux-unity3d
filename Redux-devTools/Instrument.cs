@@ -4,9 +4,14 @@ using System.Diagnostics;
 public static partial class Redux {
 	public static partial class Devtools {
 
+		static void log (string text) {
+			System.Diagnostics.Debug.WriteLine (DateTime.Now + ": " + text);
+			UnityEngine.Debug.Log (DateTime.Now + ": " + text);
+		}
+
 		public static Instrument instrument = (Listener listener) => {
 
-			var monitoredState = new MonitoredState();
+			var timeline = new Timeline();
 
 			MonitorAction monitorAction = action => {
 				return ActionCreators.perform(action);
@@ -19,10 +24,21 @@ public static partial class Redux {
 
 				switch (action.type) {
 				case Redux.ActionType.INIT: {
+						var st = new PastState(new StateTree(), DateTime.Now, action);
+						timeline.monitoredStates.Add(st);
+						timeline.monitoredStateIndex = 0;
 						nextStateTree = finalReducer(stateTree, action);
-						var st = new ComputedStateTree(nextStateTree, DateTime.Now, action);
-						monitoredState.computedStateTrees.Add(st);
-						monitoredState.computedStateTreeIndex = 0;
+						log ("Devtools.InitialStateTree: " + nextStateTree.ToString());
+					}
+					break;
+
+				case ActionTypes.RESET: {
+						var monitoredState = timeline.monitoredStates[
+							timeline.monitoredStateIndex = 0];
+						
+						stateTree = monitoredState.stateTree;
+						nextStateTree = finalReducer(stateTree, monitoredState.action);
+						log ("Devtools.InitialStateTree: " + nextStateTree);
 					}
 					break;
 
@@ -31,41 +47,47 @@ public static partial class Redux {
 							timestamp = new DateTime(),
 							action = new Object()
 						});
-						stateTree = monitorReducerImple(finalReducer, stateTree, a.action);
-						nextStateTree = finalReducer(stateTree, a.action);
-						if (!stateTree.Equals(nextStateTree)) {
-							var st = new ComputedStateTree(nextStateTree, a.timestamp, a.action);
-							monitoredState.computedStateTrees.Add(st);
-							monitoredState.computedStateTreeIndex = 
-								monitoredState.computedStateTrees.Count - 1;
-						}
-					}
-					break;
 
-				case ActionTypes.RESET: {
-						monitoredState.computedStateTreeIndex = 0;
-						nextStateTree = monitoredState.computedStateTrees[
-							monitoredState.computedStateTreeIndex];
+						nextStateTree = monitorReducerImple(finalReducer, stateTree, a.action);
 					}
 					break;
 
 				case ActionTypes.JUMP_TO_STATE: {
 						var index = action.to<int>();
-						if (monitoredState.computedStateTreeIndex != index) {
-							var last = monitoredState.computedStateTrees.Count - 1;
-							index = index < 0 ? 0 : index;
-							index = index >= last ? last : index;
-							nextStateTree = monitoredState.computedStateTrees[
-								monitoredState.computedStateTreeIndex = index];
+						if (timeline.monitoredStateIndex == index) {
+							break;
 						}
+
+						var last = timeline.monitoredStates.Count - 1;
+						index = index < 0 ? 0 : index;
+						index = index >= last ? last : index;
+						var monitoredState = timeline.monitoredStates[
+							timeline.monitoredStateIndex = index];
+						
+						log ("Devtools.MonitoredStateTree: " + monitoredState.stateTree);
+						log ("Devtools.Action: " + monitoredState.action);
+						stateTree = monitoredState.stateTree;
+						nextStateTree = finalReducer(stateTree, monitoredState.action);
+						log ("Devtools.NextStateTree: " + nextStateTree);
 					}
 					break;
 
-				default:
+				default: {
+						if (!timeline.timeTravling) {
+							var st = new PastState(stateTree, DateTime.Now, action);
+							timeline.monitoredStates.Add(st);
+							timeline.monitoredStateIndex = timeline.monitoredStates.Count - 1;
+						}
+
+						nextStateTree = finalReducer(stateTree, action);
+						log ("Devtools.NextStateTree: " + nextStateTree);
+					}
 					return nextStateTree;
 				}
 
-				listener(monitoredState);
+				if (listener != null) {
+					listener(timeline);
+				}
 				return nextStateTree;
 			};
 

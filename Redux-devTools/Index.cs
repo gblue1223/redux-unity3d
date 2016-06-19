@@ -6,22 +6,27 @@ public static partial class Redux {
 	public static partial class Devtools {
 		#region Type
 
-		public delegate void Listener (MonitoredState state);
+		public delegate void Listener (Timeline timeline);
 		public delegate Enhancer Instrument (Listener listener);
 
-		public class ComputedStateTree : StateTree {
+		public class PastState {
+			public StateTree stateTree;
 			public DateTime timestamp;
 			public object action;
-			public ComputedStateTree(StateTree stateTree,
-				DateTime timestamp, object action) : base(stateTree) {
+
+			public PastState(StateTree stateTree, DateTime timestamp, object action) {
+				this.stateTree = (StateTree)stateTree.Clone ();
 				this.timestamp = timestamp;
 				this.action = action;
 			}
 		}
 
-		public class MonitoredState {
-			public int computedStateTreeIndex = 0;
-			public List<ComputedStateTree> computedStateTrees = new List<ComputedStateTree>();
+		public class Timeline {
+			public int monitoredStateIndex = 0;
+			public List<PastState> monitoredStates = new List<PastState>();
+			public bool timeTravling {
+				get { return this.monitoredStateIndex < this.monitoredStates.Count - 1; }
+			}
 		};
 
 		internal delegate object MonitorAction (object action);
