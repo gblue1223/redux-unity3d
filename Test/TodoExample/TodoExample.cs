@@ -17,12 +17,12 @@ public partial class TodoExample : MonoBehaviour {
 				ReduxMiddleware.createLogger,
 				ReduxMiddleware.createCrashReport
 			}),
-			Redux.Devtools.instrument(this.OnChangeMonitoredState)
+			Redux.Devtools.instrument(this.onChangeMonitoredState)
 		});
 
 		this.store = Redux.createStore (finalReducer, null, enhancer);
-		this.store.subscribe (this.OnChangeState);
-		this.OnChangeState (this.store);
+		this.store.subscribe (this.onChangeState);
+		this.onChangeState (this.store);
 	}
 
 	// Update is called once per frame
@@ -121,7 +121,7 @@ public partial class TodoExample : MonoBehaviour {
 		if (GUI.Button(new Rect(x, y, w, h), ">")) {
 			var i = this.timeline.monitoredStateIndex + 1;
 			if (i < this.timeline.monitoredStates.Count) {
-				Global.store.dispatch (Redux.Devtools.ActionCreators.jumpToState(i));
+				this.store.dispatch (Redux.Devtools.ActionCreators.jumpToState(i));
 			}
 		}
 
@@ -140,12 +140,12 @@ public partial class TodoExample : MonoBehaviour {
 		}
 	}
 
-	void OnChangeState (Redux.Store store) {
+	void onChangeState (Redux.Store store) {
 		this.todos = (Item[])store.getState (Reducers.todos);
 		this.visibilityFilter = (string)store.getState (Reducers.visibilityFilter);
 	}
 
-	void OnChangeMonitoredState (Redux.Devtools.Timeline timeline) {
+	void onChangeMonitoredState (Redux.Devtools.Timeline timeline) {
 		this.timeline = timeline;
 	}
 }

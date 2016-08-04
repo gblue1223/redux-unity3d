@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 
 public class SimpleReduxTest : MonoBehaviour {
 	public static class ActionCreators {
@@ -20,7 +22,7 @@ public class SimpleReduxTest : MonoBehaviour {
 		};
 	}
 
-	public static class Reducers {
+	public class Reducers {
 		public static Redux.Reducer sumResult = (state, action) => {
 			var a = action as Redux.Action;
 			if (a.isInitialAction) {
@@ -50,11 +52,29 @@ public class SimpleReduxTest : MonoBehaviour {
 	void Start () {
 		Debug.Log ("----------- Add reducers");
 
+		var reducers = new Redux.Reducer[] {
+			Reducers.sumResult,
+			Reducers.multiplyResult
+		};
+
+//		var type = typeof (Reducers);
+//		var methods = type.GetMethods (
+//			System.Reflection.BindingFlags.NonPublic |
+//			System.Reflection.BindingFlags.Public |
+//			System.Reflection.BindingFlags.Static |
+//			System.Reflection.BindingFlags.FlattenHierarchy);
+//
+//		var reducers = new List<Redux.Reducer> ();
+//		foreach (var method in methods) {
+//			if (method.DeclaringType.FullName == type.FullName) {
+//				//reducers
+//				Expression.Lambda<Redux.Reducer> (
+//					Expression.Call (Expression.Convert (input, o.GetType ()), method), input).Compile ();
+//			}
+//		}
+
 		this.store = Redux.createStore (
-			Redux.combineReducers(new Redux.Reducer[]{
-				Reducers.sumResult,
-				Reducers.multiplyResult
-			}),
+			Redux.combineReducers(reducers),
 			null,
 			Redux.applyMiddleware(new Redux.Middleware[]{
 				ReduxMiddleware.createThunk,
@@ -65,7 +85,7 @@ public class SimpleReduxTest : MonoBehaviour {
 
 		Debug.Log ("----------- Subscribe");
 
-		var unsubscribe = this.store.subscribe (this.OnChangeState);
+		var unsubscribe = this.store.subscribe (this.onChangeState);
 		{
 			Debug.Log ("----------- Dispatch");
 
@@ -97,7 +117,7 @@ public class SimpleReduxTest : MonoBehaviour {
 	void Update () {
 	}
 
-	void OnChangeState (Redux.Store store) {
+	void onChangeState (Redux.Store store) {
 		Debug.Log ("sum: " + store.getState(Reducers.sumResult));
 		Debug.Log ("multiply: " + store.getState(Reducers.multiplyResult));
 	}

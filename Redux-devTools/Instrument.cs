@@ -4,9 +4,10 @@ using System.Diagnostics;
 public static partial class Redux {
 	public static partial class Devtools {
 
-		static void log (string text) {
+		static void log (DateTime timestamp, string text) {
 			System.Diagnostics.Debug.WriteLine (DateTime.Now + ": " + text);
-			UnityEngine.Debug.Log (DateTime.Now + ": " + text);
+			text = text.Replace ('<', '(').Replace ('>', ')');
+			UnityEngine.Debug.Log (timestamp + ": <color=teal>" + text + "</color>");
 		}
 
 		public static Instrument instrument = (Listener listener) => {
@@ -28,7 +29,7 @@ public static partial class Redux {
 						timeline.monitoredStates.Add(st);
 						timeline.monitoredStateIndex = 0;
 						nextStateTree = finalReducer(stateTree, action);
-						log ("Devtools.InitialStateTree: " + nextStateTree.ToString());
+						log (DateTime.Now, "Devtools.InitialStateTree: " + nextStateTree.ToString());
 					}
 					break;
 
@@ -38,7 +39,7 @@ public static partial class Redux {
 						
 						stateTree = monitoredState.stateTree;
 						nextStateTree = finalReducer(stateTree, monitoredState.action);
-						log ("Devtools.InitialStateTree: " + nextStateTree);
+						log (monitoredState.timestamp, "Devtools.InitialStateTree: " + nextStateTree);
 					}
 					break;
 
@@ -64,11 +65,11 @@ public static partial class Redux {
 						var monitoredState = timeline.monitoredStates[
 							timeline.monitoredStateIndex = index];
 						
-						log ("Devtools.MonitoredStateTree: " + monitoredState.stateTree);
-						log ("Devtools.Action: " + monitoredState.action);
+						log (monitoredState.timestamp, "Devtools.MonitoredStateTree: " + monitoredState.stateTree);
+						log (monitoredState.timestamp, "Devtools.Action: " + monitoredState.action);
 						stateTree = monitoredState.stateTree;
 						nextStateTree = finalReducer(stateTree, monitoredState.action);
-						log ("Devtools.NextStateTree: " + nextStateTree);
+						log (monitoredState.timestamp, "Devtools.NextStateTree: " + nextStateTree);
 					}
 					break;
 
@@ -80,7 +81,7 @@ public static partial class Redux {
 						}
 
 						nextStateTree = finalReducer(stateTree, action);
-						log ("Devtools.NextStateTree: " + nextStateTree);
+						log (DateTime.Now, "Devtools.NextStateTree: " + nextStateTree);
 					}
 					return nextStateTree;
 				}

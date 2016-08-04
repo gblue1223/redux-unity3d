@@ -27,6 +27,9 @@ public static partial class Redux {
 			var sb = new StringBuilder ();
 			sb.Append ("{ ");
 			foreach (var pair in this) {
+				if (sb.Length > 2) {
+					sb.Append (",\r\n");
+				}
 				sb.Append ("\"");
 				sb.Append (pair.Key.Method.ReflectedType.FullName);
 				sb.Append (".");
@@ -37,7 +40,6 @@ public static partial class Redux {
 				sb.Append ("\"");
 				sb.Append (pair.Value.ToString ());
 				sb.Append ("\"");
-				sb.Append (", \r\n");
 			}
 			sb.Append (" }");
 			return sb.ToString();
