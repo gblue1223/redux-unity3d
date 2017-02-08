@@ -4,6 +4,8 @@ Redux for Unity3D (.NET 3.5)
 This is C# version of Redux(http://redux.js.org/) for Unity3D. Almost every interfaces are same as the original Redux. 
 However, I'm not expert in C#. So, it is welcome if you have an idea to elevate this library.
 
+See [`Test/`](./Test) for examples.
+
 ## create store
 ```c#
 this.store = Redux.createStore (
